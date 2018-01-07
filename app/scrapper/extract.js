@@ -19,7 +19,7 @@ const extract = async function (frame) {
     const row = rows[i];
     if (!row || row.length !== 3) {
       // should never happen
-      return null;
+      throw new Error('invalid row');
     }
 
     const transaction = /\b\d+\b/.exec(row[1]);
@@ -27,7 +27,7 @@ const extract = async function (frame) {
 
     if (!transaction || !amount) {
       // should never happen
-      return null;
+      throw new Error('cant parse html');
     }
 
     data.push({

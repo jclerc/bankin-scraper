@@ -1,7 +1,11 @@
+// import puppeteer to work with Chrome headless
 const puppeteer = require('puppeteer');
-const config = require('./config');
-const Logger = require('./logger');
+// our scrapper class
 const Scrapper = require('./scrapper');
+// our logger utility
+const Logger = require('./logger');
+// and config values
+const config = require('./config');
 
 Logger.config = config.logger;
 const logger = new Logger('APP');
@@ -11,73 +15,100 @@ process.on('unhandledRejection', (error) => {
   logger.error(error.stack);
 });
 
-(async () => {
+logger.info('Starting...');
+puppeteer.launch().then(async (browser) => {
   try {
-    logger.info('Starting...');
-    const browser = await puppeteer.launch();
-
-    const promises = [];
+    // our scrapper array (holding promises)
+    const scrappers = [];
     for (let i = 0; i < config.threads; i++) {
-      const promise = browser.newPage().then(page => new Scrapper(page, new Logger()));
-      promises.push(promise);
+      const scrapper = browser.newPage().then(page => new Scrapper(page, new Logger()));
+      scrappers.push(scrapper);
     }
 
-    // our army
-    const scrappers = await Promise.all(promises);
-
-    // result set
+    // transactions chunks, or indexed-array of array of transactions
     const chunks = [];
 
+    // errored works
     const errors = [];
-    let i = 0;
-    let done = false;
+    // variables to control the loop
+    let hasMore = true;
+    let currentIndex = 0;
+    let maxErrorTries = 10;
 
     const work = async function work(scrapper) {
+      // get index of the page we will fetch
       let index;
       if (errors.length) {
+        // retry errors first
+        if (maxErrorTries-- <= 0) {
+          // we got trap in an infinite loop
+          logger.error('app:work → infinite loop');
+          return;
+        }
+        // get last errored work
         index = errors.pop();
-      } else if (done) {
+      } else if (!hasMore) {
+        // reached the end, and no error
         return;
       } else {
-        index = i;
-        i += 1;
+        // fetch next page
+        index = currentIndex++;
       }
 
       try {
-        console.time('fetch');
-        const data = await scrapper.fetch(config.url.replace('{START}', 50 * index));
-        console.timeEnd('fetch');
-        logger.info('DATA LENGTH →', data ? data.length : 'null');
-        logger.info('DATA →', JSON.stringify(data).substr(0, 70) + '..');
+        // make our url from our index
+        const url = config.url.replace('{START}', config.transactionsPerPage * index);
 
-        if (data.length === 0) {
-          done = true;
+        // fetch transactions
+        console.time('fetch');
+        const data = await scrapper.fetch(url);
+        console.timeEnd('fetch');
+
+        scrapper.logger.debug('→', JSON.stringify(data).substr(0, 57) + '..');
+
+        if (!data || (data.length !== 0 && data.length !== config.transactionsPerPage)) {
+          // data is invalid
+          throw new Error('fetched invalid data: ' + JSON.stringify(data));
+        } else if (data.length === 0) {
+          // success but we reached the end!
+          hasMore = false;
         } else {
+          // success, add chunk to result set
           chunks[index] = data;
 
-          // DEBUG = STOP AFTER FEW REQUESTS
-          if (chunks.length >= 4) {
-            done = true;
-          }
-          // DEBUG ^^^
+          // DEBUG: stop after few requests
+          if (chunks.length >= 5) hasMore = false;
         }
       } catch (error) {
-        logger.error('scrapper:fetch', error);
+        logger.error('app:work →', error);
         errors.push(index);
       }
 
+      // and call the next work
       await work(scrapper);
     };
 
-    await Promise.all(scrappers.map(work));
+    // let's start all promises!
+    await Promise.all(scrappers.map(scrapper => scrapper.then(work)));
 
-    logger.info('DATA', JSON.stringify(chunks).substr(0, 250) + '   . . .   ' + JSON.stringify(chunks).slice(-250));
-
-    logger.info('Closing...');
+    // close browser properly
+    logger.debug('Closing...');
     await browser.close();
-  } catch (error) {
-    logger.error('Error thrown:', error);
-  }
 
-  logger.info('Session ended!');
-})();
+    if (hasMore || maxErrorTries <= 0) {
+      // we failed
+      logger.error('Failed to fetch transactions. Sorry.');
+      process.exit(1);
+    } else {
+      // flatten chunks into one array
+      const transactions = chunks.reduce((a, b) => a.concat(b), []);
+      // log some transactions
+      const json = JSON.stringify(transactions);
+      logger.info('Ended with ' + chunks.length + ' transactions:', '\n' + json.substr(0, 300) + '   . . .   ' + json.slice(-300));
+    }
+  } catch (error) {
+    await browser.close();
+    logger.error('fatal error →', error);
+    process.exit(2);
+  }
+});
