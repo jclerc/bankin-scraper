@@ -4,16 +4,29 @@ class Logger {
   constructor(name = null, silent = false) {
     if (silent) {
       this.log = () => {};
-    } else if (name) {
-      this.log = console.log.bind(console, colors.white(name));
     } else {
-      this.log = console.log.bind(console);
+      let coloredName;
+      if (name) {
+        coloredName = colors.white(name);
+      } else {
+        coloredName = colors.white('#' + Logger.currentId);
+        Logger.currentId += 1;
+      }
+
+      if (Logger.config.time) {
+        this.log = (...msg) => {
+          const time = ((new Date().getTime() / 1000) - Logger.start).toFixed(4);
+          console.log(colors.green(time), coloredName, ...msg);
+        };
+      } else {
+        this.log = console.log.bind(coloredName);
+      }
     }
   }
 
   debug(...msg) {
-    if (Logger.debug) {
-      this.log(colors.green('DEBUG'), ...msg);
+    if (Logger.config.debug) {
+      this.log(colors.magenta('DEBUG'), ...msg);
     }
   }
 
@@ -30,6 +43,12 @@ class Logger {
   }
 }
 
-Logger.debug = false;
+Logger.currentId = 0;
+Logger.start = (new Date().getTime() / 1000) - process.uptime();
+
+Logger.config = {
+  debug: false,
+  time: true,
+};
 
 module.exports = Logger;

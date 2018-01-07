@@ -3,7 +3,7 @@ const config = require('./config');
 const Logger = require('./logger');
 const Scrapper = require('./scrapper');
 
-Logger.debug = config.verbose;
+Logger.config = config.logger;
 const logger = new Logger('APP');
 
 process.on('unhandledRejection', (error) => {
@@ -18,7 +18,7 @@ process.on('unhandledRejection', (error) => {
 
     const promises = [];
     for (let i = 0; i < config.threads; i++) {
-      const promise = browser.newPage().then(page => new Scrapper(page, new Logger(`#${i}`)));
+      const promise = browser.newPage().then(page => new Scrapper(page, new Logger()));
       promises.push(promise);
     }
 
@@ -44,7 +44,9 @@ process.on('unhandledRejection', (error) => {
       }
 
       try {
+        console.time('fetch');
         const data = await scrapper.fetch(config.url.replace('{START}', 50 * index));
+        console.timeEnd('fetch');
         logger.info('DATA LENGTH →', data ? data.length : 'null');
         logger.info('DATA →', JSON.stringify(data).substr(0, 70) + '..');
 
