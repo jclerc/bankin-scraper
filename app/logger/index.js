@@ -3,24 +3,24 @@ const colors = require('colors/safe');
 class Logger {
   constructor(name = null, silent = false) {
     if (silent) {
-      this.output = () => {};
+      this.log = () => {};
     } else if (name) {
-      this.output = console.log.bind(console, colors.white(name));
+      this.log = console.log.bind(console, colors.white(name));
     } else {
-      this.output = console.log.bind(console);
+      this.log = console.log.bind(console);
     }
   }
 
-  log(...msg) {
-    this.output(colors.blue('INFO'), ...msg);
+  info(...msg) {
+    this.log(colors.blue('INFO'), ...msg);
   }
 
   warn(...msg) {
-    this.output(colors.yellow('WARN'), ...msg);
+    this.log(colors.yellow('WARN'), ...msg);
   }
 
   error(...msg) {
-    this.output(colors.red('ERROR'), ...msg);
+    this.log(colors.red('ERROR'), ...msg);
   }
 }
 

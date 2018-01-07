@@ -7,7 +7,7 @@ const logger = new Logger('APP');
 
 (async () => {
   try {
-    logger.log('Starting...');
+    logger.info('Starting...');
     const browser = await puppeteer.launch();
 
     const promises = [];
@@ -39,8 +39,8 @@ const logger = new Logger('APP');
 
       try {
         const data = await scrapper.do(config.url.replace('{START}', 50 * index));
-        logger.log('DATA LENGTH →', data ? data.length : 'null');
-        logger.log('DATA →', JSON.stringify(data).substr(0, 70) + '..');
+        logger.info('DATA LENGTH →', data ? data.length : 'null');
+        logger.info('DATA →', JSON.stringify(data).substr(0, 70) + '..');
 
         if (data.length === 0) {
           done = true;
@@ -75,8 +75,8 @@ const logger = new Logger('APP');
 
     //     try {
     //       const data = await scrapper.do(config.url.replace('{START}', 10000 + 100 * i));
-    //       logger.log('DATA LENGTH →', data ? data.length : 'null');
-    //       logger.log('DATA →', JSON.stringify(data).substr(0, 70) + '..');
+    //       logger.info('DATA LENGTH →', data ? data.length : 'null');
+    //       logger.info('DATA →', JSON.stringify(data).substr(0, 70) + '..');
     //       resolve(data);
     //     } catch (error) {
     //       logger.error('HERE WE ARE', error);
@@ -86,13 +86,13 @@ const logger = new Logger('APP');
     // }
 
     // const data = await Promise.all(scraps);
-    logger.log('DATA', chunks);
+    logger.info('DATA', chunks);
 
-    logger.log('Closing...');
+    logger.info('Closing...');
     await browser.close();
   } catch (error) {
     logger.error('Error thrown:', error);
   }
 
-  logger.log('Session ended!');
+  logger.info('Session ended!');
 })();

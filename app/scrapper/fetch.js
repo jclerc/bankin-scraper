@@ -2,24 +2,24 @@
 const parse = require('./parse');
 
 const fetch = async (page, url, logger) => {
-  logger.log('Navigate to ' + url);
+  logger.info('Navigate to ' + url);
   await page.goto(url, { waitUntil: 'domcontentloaded' });
 
-  logger.log('Wait for table or iframe');
+  logger.info('Wait for table or iframe');
   let timeout;
   const data = await Promise.race([
     page.waitForSelector('#dvTable table').then(() => {
-      logger.log('Found: table');
+      logger.info('Found: table');
       return parse(page.mainFrame());
     }),
     page.waitForSelector('iframe#fm').then(() => {
-      logger.log('Found: iframe');
+      logger.info('Found: iframe');
       const frame = page.frames().find(f => f.name() === 'fm');
       return parse(frame);
     }),
     new Promise((resolve, reject) => {
       timeout = setTimeout(() => {
-        logger.log('Timeout!');
+        logger.info('Timeout!');
         reject('timed out!');
       }, 3000 * 1.15);
     }),

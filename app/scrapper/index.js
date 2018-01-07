@@ -7,7 +7,7 @@ class Scrapper {
     this.page = page;
     this.logger = logger;
     setup(page, this.logger);
-    this.logger.log('Scrapper initialized!');
+    this.logger.info('Scrapper initialized!');
   }
 
   do(url) {
