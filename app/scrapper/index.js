@@ -1,18 +1,23 @@
 
 const setup = require('./setup');
-const fetch = require('./fetch');
+const navigate = require('./navigate');
+const extract = require('./extract');
 
 class Scrapper {
   constructor(page, logger) {
     this.page = page;
     this.logger = logger;
-    setup(page, this.logger);
-    this.logger.info('Scrapper initialized!');
+    this.setup(page);
   }
 
-  do(url) {
-    return fetch(this.page, url, this.logger);
+  async fetch(url) {
+    const frame = await this.navigate(url);
+    return this.extract(frame);
   }
 }
+
+Scrapper.prototype.setup = setup;
+Scrapper.prototype.navigate = navigate;
+Scrapper.prototype.extract = extract;
 
 module.exports = Scrapper;

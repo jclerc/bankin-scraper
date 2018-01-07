@@ -1,5 +1,6 @@
 
-const parse = async (frame) => {
+// needs to be a function for this
+const extract = async function (frame) {
   const rows = await frame.$$eval('table tr', (nodes) => {
     const transactions = [];
     for (let i = 1; i < nodes.length; i++) {
@@ -39,4 +40,4 @@ const parse = async (frame) => {
   return data;
 };
 
-module.exports = parse;
+module.exports = extract;

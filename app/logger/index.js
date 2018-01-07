@@ -11,6 +11,12 @@ class Logger {
     }
   }
 
+  debug(...msg) {
+    if (Logger.debug) {
+      this.log(colors.green('DEBUG'), ...msg);
+    }
+  }
+
   info(...msg) {
     this.log(colors.blue('INFO'), ...msg);
   }
@@ -23,5 +29,7 @@ class Logger {
     this.log(colors.red('ERROR'), ...msg);
   }
 }
+
+Logger.debug = false;
 
 module.exports = Logger;

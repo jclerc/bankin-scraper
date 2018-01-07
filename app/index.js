@@ -3,7 +3,13 @@ const config = require('./config');
 const Logger = require('./logger');
 const Scrapper = require('./scrapper');
 
+Logger.debug = config.verbose;
 const logger = new Logger('APP');
+
+process.on('unhandledRejection', (error) => {
+  logger.error('Unhandled Promise Rejection!');
+  logger.error(error.stack);
+});
 
 (async () => {
   try {
@@ -27,18 +33,18 @@ const logger = new Logger('APP');
     let done = false;
 
     const work = async function work(scrapper) {
-      if (done) return;
-
       let index;
       if (errors.length) {
         index = errors.pop();
+      } else if (done) {
+        return;
       } else {
         index = i;
         i += 1;
       }
 
       try {
-        const data = await scrapper.do(config.url.replace('{START}', 50 * index));
+        const data = await scrapper.fetch(config.url.replace('{START}', 50 * index));
         logger.info('DATA LENGTH →', data ? data.length : 'null');
         logger.info('DATA →', JSON.stringify(data).substr(0, 70) + '..');
 
@@ -46,9 +52,15 @@ const logger = new Logger('APP');
           done = true;
         } else {
           chunks[index] = data;
+
+          // DEBUG = STOP AFTER FEW REQUESTS
+          if (chunks.length >= 4) {
+            done = true;
+          }
+          // DEBUG ^^^
         }
       } catch (error) {
-        logger.error('HERE WE ARE', error);
+        logger.error('scrapper:fetch', error);
         errors.push(index);
       }
 
@@ -57,36 +69,7 @@ const logger = new Logger('APP');
 
     await Promise.all(scrappers.map(work));
 
-    // const chunks = [];
-
-    // let tries = 10000;
-    // while (tries >= 0) {
-
-    //   scrappers;
-
-    //   tries -= 1;
-    // }
-
-    // const scraps = [];
-    // for (let i = 0; i < 1; i++) {
-    //   scraps.push(new Promise(async (resolve, reject) => {
-    //     const page = await browser.newPage();
-    //     const scrapper = new Scrapper(page, new Logger('@' + i));
-
-    //     try {
-    //       const data = await scrapper.do(config.url.replace('{START}', 10000 + 100 * i));
-    //       logger.info('DATA LENGTH →', data ? data.length : 'null');
-    //       logger.info('DATA →', JSON.stringify(data).substr(0, 70) + '..');
-    //       resolve(data);
-    //     } catch (error) {
-    //       logger.error('HERE WE ARE', error);
-    //     }
-    //     reject();
-    //   }));
-    // }
-
-    // const data = await Promise.all(scraps);
-    logger.info('DATA', chunks);
+    logger.info('DATA', JSON.stringify(chunks).substr(0, 250) + '   . . .   ' + JSON.stringify(chunks).slice(-250));
 
     logger.info('Closing...');
     await browser.close();
