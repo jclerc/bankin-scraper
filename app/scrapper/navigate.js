@@ -2,11 +2,11 @@
 // needs to be a function for class context
 const navigate = async function (url) {
   // load page using given url
-  this.logger.info('Navigate to ' + url);
+  this.logger.info('Going to ' + url);
   await this.page.goto(url, { waitUntil: 'domcontentloaded' });
 
   // avoid infinite waiting
-  const options = { timeout: 3200 };
+  const options = { timeout: 8500 };
   const start = Date.now();
   this.logger.info('Waiting for table or iframe..');
 

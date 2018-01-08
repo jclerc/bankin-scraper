@@ -18,9 +18,17 @@ process.on('exit', () => {
   logger.debug('Took ' + process.uptime().toString() + 's');
 });
 
+const options = {
+  // headless: false,
+  // slowMo: 1000,
+};
+
 logger.info('Starting...');
-puppeteer.launch().then(async (browser) => {
+puppeteer.launch(options).then(async (browser) => {
   try {
+    // close default tab
+    browser.pages().then(pages => pages.forEach(page => page.close()));
+
     // our scrapper array (holding promises)
     const scrappers = [];
     for (let i = 0; i < config.threads; i++) {
@@ -45,7 +53,7 @@ puppeteer.launch().then(async (browser) => {
         // retry errors first
         if (maxErrorTries-- <= 0) {
           // too many errors, stopping now
-          logger.error('app:work → too many errors');
+          scrapper.logger.error('app:work → too many errors');
           return;
         }
         // get last errored work
@@ -68,7 +76,8 @@ puppeteer.launch().then(async (browser) => {
         const ms = Date.now() - start;
 
         // debug logging
-        scrapper.logger.debug('Fetched data in ' + ms + 'ms:', '\n→', JSON.stringify(data).substr(0, 73) + '..');
+        scrapper.logger.info('Fetched data in ' + ms + 'ms');
+        scrapper.logger.debug('→', JSON.stringify(data).substr(0, 57) + '..');
 
         if (!data) {
           // data is invalid
@@ -84,7 +93,7 @@ puppeteer.launch().then(async (browser) => {
         // DEBUG: stop after few requests
         // if (chunks.length >= 5) hasMore = false;
       } catch (error) {
-        logger.error('app:work →', error);
+        scrapper.logger.error('app:work →', error);
         errors.push(index);
       }
 

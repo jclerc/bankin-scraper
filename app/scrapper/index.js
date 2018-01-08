@@ -19,6 +19,7 @@ class Scrapper {
       await this.page.waitForSelector('#btnGenerate');
       const btn = await this.page.$('#btnGenerate');
       btn.click();
+      this.logger.debug('Clicked reload button!');
     });
 
     // scrapper is ready
