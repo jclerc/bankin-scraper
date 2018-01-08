@@ -1,54 +1,26 @@
 
-// needs to be a function for this
+// needs to be a function for class context
 const navigate = async function (url) {
-  this.logger.debug('Navigate to ' + url);
+  // load page using given url
+  this.logger.info('Navigate to ' + url);
   await this.page.goto(url, { waitUntil: 'domcontentloaded' });
-  let valid = true;
 
-  // btnGenerate is generated after dialog being dismissed
-  this.page.waitForSelector('#btnGenerate').then(async () => {
-    if (!valid) return;
-    const btnReload = await this.page.$('#btnGenerate');
-    if (btnReload) {
-      btnReload.click();
-      this.logger.debug('clicked button');
-    } else {
-      this.logger.error('no button?');
-    }
-  }).catch(err => this.logger.warn('wait:btn', err));
+  // avoid infinite waiting
+  const options = { timeout: 3200 };
+  const start = Date.now();
+  this.logger.info('Waiting for table or iframe..');
 
-  this.logger.info('Wait for table or iframe');
-  let timeout;
+  // wait for first selector to be found
   const frame = await Promise.race([
-    this.page.waitForSelector('#dvTable table').then(() => {
-      if (!valid) return null;
-      this.logger.info('Found: table');
-      return this.page.mainFrame();
-    }),
-    this.page.waitForSelector('iframe#fm').then(() => {
-      if (!valid) return null;
-      this.logger.info('Found: iframe');
-      return this.page.frames().find(f => f.name() === 'fm');
-    }),
-    new Promise((resolve, reject) => {
-      timeout = setTimeout(() => {
-        this.logger.info('Timeout!');
-        reject('timed out!');
-      }, 3000 * 1.15);
-    }),
+    this.page.waitForSelector('#dvTable table', options)
+      .then(() => this.page.mainFrame()),
+
+    this.page.waitForSelector('iframe#fm', options)
+      .then(() => this.page.frames().find(f => f.name() === 'fm')),
   ]);
 
-  if (timeout) {
-    clearTimeout(timeout);
-  }
-
-  valid = false;
-
-  if (frame) {
-    return frame;
-  }
-
-  throw new Error('no frame');
+  this.logger.debug('Found: ' + (frame === this.page.mainFrame() ? 'table' : 'iframe') + ' after ' + (Date.now() - start) + 'ms');
+  return frame;
 };
 
 module.exports = navigate;

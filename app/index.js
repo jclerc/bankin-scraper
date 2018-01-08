@@ -11,8 +11,11 @@ Logger.config = config.logger;
 const logger = new Logger('APP');
 
 process.on('unhandledRejection', (error) => {
-  logger.error('Unhandled Promise Rejection!');
-  logger.error(error.stack);
+  logger.error('Unhandled Promise Rejection:\n', error.stack);
+});
+
+process.on('exit', () => {
+  logger.debug('Took ' + process.uptime().toString() + 's');
 });
 
 logger.info('Starting...');
@@ -41,8 +44,8 @@ puppeteer.launch().then(async (browser) => {
       if (errors.length) {
         // retry errors first
         if (maxErrorTries-- <= 0) {
-          // we got trap in an infinite loop
-          logger.error('app:work → infinite loop');
+          // too many errors, stopping now
+          logger.error('app:work → too many errors');
           return;
         }
         // get last errored work
@@ -60,25 +63,26 @@ puppeteer.launch().then(async (browser) => {
         const url = config.url.replace('{START}', config.transactionsPerPage * index);
 
         // fetch transactions
-        console.time('fetch');
+        const start = Date.now();
         const data = await scrapper.fetch(url);
-        console.timeEnd('fetch');
+        const ms = Date.now() - start;
 
-        scrapper.logger.debug('→', JSON.stringify(data).substr(0, 57) + '..');
+        // debug logging
+        scrapper.logger.debug('Fetched data in ' + ms + 'ms:', '\n→', JSON.stringify(data).substr(0, 73) + '..');
 
-        if (!data || (data.length !== 0 && data.length !== config.transactionsPerPage)) {
+        if (!data) {
           // data is invalid
           throw new Error('fetched invalid data: ' + JSON.stringify(data));
-        } else if (data.length === 0) {
+        } else if (data.length !== config.transactionsPerPage) {
           // success but we reached the end!
           hasMore = false;
-        } else {
-          // success, add chunk to result set
-          chunks[index] = data;
-
-          // DEBUG: stop after few requests
-          if (chunks.length >= 5) hasMore = false;
         }
+
+        // success, add chunk to result set
+        chunks[index] = data;
+
+        // DEBUG: stop after few requests
+        // if (chunks.length >= 5) hasMore = false;
       } catch (error) {
         logger.error('app:work →', error);
         errors.push(index);
@@ -104,7 +108,7 @@ puppeteer.launch().then(async (browser) => {
       const transactions = chunks.reduce((a, b) => a.concat(b), []);
       // log some transactions
       const json = JSON.stringify(transactions);
-      logger.info('Ended with ' + chunks.length + ' transactions:', '\n' + json.substr(0, 300) + '   . . .   ' + json.slice(-300));
+      logger.info('Ended with ' + transactions.length + ' transactions:', '\n' + json.substr(0, 300) + '   . . .   ' + json.slice(-300));
     }
   } catch (error) {
     await browser.close();

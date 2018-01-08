@@ -15,7 +15,7 @@ class Logger {
 
       if (Logger.config.time) {
         this.log = (...msg) => {
-          const time = ((new Date().getTime() / 1000) - Logger.start).toFixed(4);
+          const time = ((new Date().getTime() / 1000) - Logger.start).toFixed(3);
           console.log(colors.bold.green(time), coloredName, ...msg);
         };
       } else {
@@ -44,7 +44,7 @@ class Logger {
 }
 
 Logger.currentId = 1;
-Logger.start = (new Date().getTime() / 1000) - process.uptime();
+Logger.start = (Date.now() / 1000) - process.uptime();
 
 Logger.config = {
   debug: false,
