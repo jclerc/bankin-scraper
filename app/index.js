@@ -1,3 +1,4 @@
+
 // import puppeteer to work with Chrome headless
 const puppeteer = require('puppeteer');
 // our scrapper class
@@ -7,24 +8,35 @@ const Logger = require('./logger');
 // and config values
 const config = require('./config');
 
+// setup logger
 Logger.config = config.logger;
 const logger = new Logger('APP');
 
+// display stacktrace on unhandled rejection
 process.on('unhandledRejection', (error) => {
   logger.error('Unhandled Promise Rejection:\n', error.stack);
 });
 
-process.on('exit', () => {
-  logger.debug('Took ' + process.uptime().toString() + 's');
+// exit whole process on first Ctrl-C
+process.on('SIGINT', async () => {
+  console.log(' → Received SIGINT');
+  logger.warn('Exiting right now.');
+  process.exit(100);
 });
 
-const options = {
-  // headless: false,
-  // slowMo: 1000,
-};
+// on quit, display some performance stats
+process.on('exit', () => {
+  // time = how many seconds elapsed since start
+  const time = process.uptime();
+  // cpu = how much cpu time our script really took
+  const { user, system } = process.cpuUsage();
+  const cpu = ((user + system) / 1e6);
+  logger.info('Total script took ' + time.toFixed(3) + 's, cpu time ' + cpu.toFixed(3) + 's, using ' + config.threads + ' threads');
+});
 
+// starting now
 logger.info('Starting...');
-puppeteer.launch(options).then(async (browser) => {
+puppeteer.launch().then(async (browser) => {
   try {
     // close default tab
     browser.pages().then(pages => pages.forEach(page => page.close()));
@@ -32,7 +44,7 @@ puppeteer.launch(options).then(async (browser) => {
     // our scrapper array (holding promises)
     const scrappers = [];
     for (let i = 0; i < config.threads; i++) {
-      const scrapper = browser.newPage().then(page => new Scrapper(page, new Logger()));
+      const scrapper = browser.newPage().then(page => new Scrapper(page, new Logger(), config.scrapper));
       scrappers.push(scrapper);
     }
 
@@ -44,7 +56,7 @@ puppeteer.launch(options).then(async (browser) => {
     // variables to control the loop
     let hasMore = true;
     let currentIndex = 0;
-    let maxErrorTries = 10;
+    let maxErrorTries = config.maxErrorTries;
 
     const work = async function work(scrapper) {
       // get index of the page we will fetch
@@ -53,7 +65,7 @@ puppeteer.launch(options).then(async (browser) => {
         // retry errors first
         if (maxErrorTries-- <= 0) {
           // too many errors, stopping now
-          scrapper.logger.error('app:work → too many errors');
+          scrapper.logger.error('work → too many errors');
           return;
         }
         // get last errored work
@@ -75,10 +87,6 @@ puppeteer.launch(options).then(async (browser) => {
         const data = await scrapper.fetch(url);
         const ms = Date.now() - start;
 
-        // debug logging
-        scrapper.logger.info('Fetched data in ' + ms + 'ms');
-        scrapper.logger.debug('→', JSON.stringify(data).substr(0, 57) + '..');
-
         if (!data) {
           // data is invalid
           throw new Error('fetched invalid data: ' + JSON.stringify(data));
@@ -87,13 +95,17 @@ puppeteer.launch(options).then(async (browser) => {
           hasMore = false;
         }
 
+        // debug logging
+        scrapper.logger.info('Fetched ' + data.length + ' transactions in ' + ms + 'ms');
+        scrapper.logger.debug('→', JSON.stringify(data).substr(0, 57) + '..');
+
         // success, add chunk to result set
         chunks[index] = data;
 
         // DEBUG: stop after few requests
-        // if (chunks.length >= 5) hasMore = false;
+        // if (chunks.length >= 20) hasMore = false;
       } catch (error) {
-        scrapper.logger.error('app:work →', error);
+        scrapper.logger.error('work →', error);
         errors.push(index);
       }
 
@@ -111,7 +123,7 @@ puppeteer.launch(options).then(async (browser) => {
     if (hasMore || maxErrorTries <= 0) {
       // we failed
       logger.error('Failed to fetch transactions. Sorry.');
-      process.exit(1);
+      process.exit(102);
     } else {
       // flatten chunks into one array
       const transactions = chunks.reduce((a, b) => a.concat(b), []);
@@ -122,6 +134,6 @@ puppeteer.launch(options).then(async (browser) => {
   } catch (error) {
     await browser.close();
     logger.error('fatal error →', error);
-    process.exit(2);
+    process.exit(101);
   }
 });

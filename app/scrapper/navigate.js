@@ -6,16 +6,16 @@ const navigate = async function (url) {
   await this.page.goto(url, { waitUntil: 'domcontentloaded' });
 
   // avoid infinite waiting
-  const options = { timeout: 8500 };
+  const { timeout } = this.config;
   const start = Date.now();
   this.logger.info('Waiting for table or iframe..');
 
   // wait for first selector to be found
   const frame = await Promise.race([
-    this.page.waitForSelector('#dvTable table', options)
+    this.page.waitForSelector('#dvTable table', { timeout })
       .then(() => this.page.mainFrame()),
 
-    this.page.waitForSelector('iframe#fm', options)
+    this.page.waitForSelector('iframe#fm', { timeout })
       .then(() => this.page.frames().find(f => f.name() === 'fm')),
   ]);
 

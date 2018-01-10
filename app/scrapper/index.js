@@ -5,9 +5,17 @@ const extract = require('./extract');
 
 // the scrapper class
 class Scrapper {
-  constructor(page, logger) {
+  constructor(page, logger, config) {
     this.page = page;
+    this.config = config;
     this.logger = logger;
+
+    if (this.config.inject) {
+      // a bit like cheating, as this will print transactions without delay or alert
+      this.page.evaluateOnNewDocument(() => {
+        Math.random = () => 0.99;
+      });
+    }
 
     // page events are persistent accross navigation, so they are registered once
     this.page.on('dialog', async (dialog) => {
