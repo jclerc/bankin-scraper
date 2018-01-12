@@ -25,9 +25,13 @@ module.exports = {
     inject: false,
   },
 
-  // how many parallel scrappers
-  threads: 8,
+  // how many chrome tabs will be used (or parallel scrappers)
+  tabs: 12,
 
   // how many retries allowed
   maxErrorTries: 20,
+
+  // the file where results will be saved
+  // set to false to prevent this
+  outputFile: './output.json',
 };

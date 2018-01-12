@@ -1,6 +1,8 @@
 
 // import puppeteer to work with Chrome headless
 const puppeteer = require('puppeteer');
+// file system helper
+const fs = require('fs');
 // our scrapper class
 const Scrapper = require('./scrapper');
 // our logger utility
@@ -19,7 +21,7 @@ process.on('unhandledRejection', (error) => {
 
 // exit whole process on first Ctrl-C
 process.on('SIGINT', async () => {
-  console.log(' → Received SIGINT');
+  logger.output(' → Received SIGINT');
   logger.warn('Exiting right now.');
   process.exit(100);
 });
@@ -31,7 +33,7 @@ process.on('exit', () => {
   // cpu = how much cpu time our script really took
   const { user, system } = process.cpuUsage();
   const cpu = ((user + system) / 1e6);
-  logger.info('Total script took ' + time.toFixed(3) + 's, cpu time ' + cpu.toFixed(3) + 's, using ' + config.threads + ' threads');
+  logger.info(`Total script took ${time.toFixed(3)}s, cpu time ${cpu.toFixed(3)}s, using ${config.tabs} tabs`);
 });
 
 // starting now
@@ -43,7 +45,7 @@ puppeteer.launch().then(async (browser) => {
 
     // our scrapper array (holding promises)
     const scrappers = [];
-    for (let i = 0; i < config.threads; i++) {
+    for (let i = 0; i < config.tabs; i++) {
       const scrapper = browser.newPage().then(page => new Scrapper(page, new Logger(), config.scrapper));
       scrappers.push(scrapper);
     }
@@ -72,6 +74,7 @@ puppeteer.launch().then(async (browser) => {
         index = errors.pop();
       } else if (!hasMore) {
         // reached the end, and no error
+        scrapper.logger.debug('No more work to do for this scrapper');
         return;
       } else {
         // fetch next page
@@ -89,15 +92,15 @@ puppeteer.launch().then(async (browser) => {
 
         if (!data) {
           // data is invalid
-          throw new Error('fetched invalid data: ' + JSON.stringify(data));
+          throw new Error(`fetched invalid data: ${JSON.stringify(data)}`);
         } else if (data.length !== config.transactionsPerPage) {
           // success but we reached the end!
           hasMore = false;
         }
 
         // debug logging
-        scrapper.logger.info('Fetched ' + data.length + ' transactions in ' + ms + 'ms');
-        scrapper.logger.debug('→', JSON.stringify(data).substr(0, 57) + '..');
+        scrapper.logger.info(`Fetched ${data.length} transactions for chunk #${index} in ${ms}ms`);
+        scrapper.logger.debug('→', `${JSON.stringify(data).substr(0, 57)}..`);
 
         // success, add chunk to result set
         chunks[index] = data;
@@ -122,14 +125,18 @@ puppeteer.launch().then(async (browser) => {
 
     if (hasMore || maxErrorTries <= 0) {
       // we failed
-      logger.error('Failed to fetch transactions. Sorry.');
+      logger.error('Failed to fetch transactions. Maybe try to increase config.maxErrorTries?');
       process.exit(102);
     } else {
       // flatten chunks into one array
       const transactions = chunks.reduce((a, b) => a.concat(b), []);
       // log some transactions
       const json = JSON.stringify(transactions);
-      logger.info('Ended with ' + transactions.length + ' transactions:', '\n' + json.substr(0, 300) + '   . . .   ' + json.slice(-300));
+      logger.info(`Ended with ${transactions.length} transactions:`, `\n${json.substr(0, 300)}   . . .   ${json.slice(-300)}`);
+      if (config.outputFile) {
+        logger.info(`Writing results to file "${config.outputFile}" (${Math.floor(json.length / 1000)}kb)`);
+        fs.writeFileSync(config.outputFile, `${json}\n`);
+      }
     }
   } catch (error) {
     await browser.close();

@@ -12,3 +12,6 @@
 # Build
 node_modules
 dist
+
+# Default output file
+/output.json
