@@ -1,5 +1,11 @@
 
-// needs to be a function for class context
+/**
+ * Extract transactions from given frame
+ * Note: it needs to be a function for class context
+ *
+ * @param {Frame} frame
+ * @returns {Array} list of transactions
+ */
 const extract = async function (frame) {
   // retrieve every rows
   const rows = await frame.$$eval('table tr', (nodes) => {
@@ -43,7 +49,7 @@ const extract = async function (frame) {
       account: row[0],
       transaction: parseInt(transaction[0], 10),
       amount: parseFloat(amount[2], 10),
-      currency: amount[1] + amount[3], // one of those is empty
+      currency: amount[1] + amount[3], // one of those is empty (e.g.: "" + "€")
     };
   });
 };

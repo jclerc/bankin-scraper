@@ -3,8 +3,18 @@
 const navigate = require('./navigate');
 const extract = require('./extract');
 
-// the scrapper class
+/**
+ * This scrapper class handle 1 page to navigate and extract data
+ */
 class Scrapper {
+
+  /**
+   * Setup scrapper and prepare page
+   *
+   * @param {Page} page
+   * @param {Logger} logger
+   * @param {Object} config
+   */
   constructor(page, logger, config) {
     this.page = page;
     this.config = config;
@@ -12,6 +22,7 @@ class Scrapper {
 
     if (this.config.inject) {
       // a bit like cheating, as this will print transactions without delay or alert
+      // (this is disabled by default)
       this.page.evaluateOnNewDocument(() => {
         Math.random = () => 0.99;
       });
@@ -20,7 +31,7 @@ class Scrapper {
     // page events are persistent accross navigation, so they are registered once
     this.page.on('dialog', async (dialog) => {
       // dismiss any dialog
-      this.logger.debug('dialog →', dialog.message());
+      this.logger.debug(`Dialog → "${dialog.message()}"`);
       dialog.dismiss();
 
       // btnGenerate is generated right after
@@ -34,6 +45,12 @@ class Scrapper {
     this.logger.debug('Scrapper initialized!');
   }
 
+  /**
+   * Get transactions of url
+   *
+   * @param {String} url
+   * @returns {Promise} that returns data if success
+   */
   async fetch(url) {
     // 1. navigate to url and get frame (body or iframe) holding transactions table
     const frame = await this.navigate(url);

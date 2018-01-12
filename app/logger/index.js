@@ -1,26 +1,48 @@
 const colors = require('colors/safe');
 
-class Logger {
-  constructor(name = null, silent = false) {
-    if (silent) {
-      this.log = () => {};
-    } else {
-      let coloredName;
-      if (name) {
-        coloredName = colors.white(name);
-      } else {
-        coloredName = colors.white('#' + Logger.currentId);
-        Logger.currentId += 1;
-      }
+// used for displaying time
+const start = (Date.now() / 1000) - process.uptime();
+// default logger name
+let currentId = 1;
 
-      if (Logger.config.time) {
-        this.log = (...msg) => {
-          const time = ((new Date().getTime() / 1000) - Logger.start).toFixed(3);
-          console.log(colors.bold.green(time), coloredName, ...msg);
-        };
-      } else {
-        this.log = console.log.bind(coloredName);
-      }
+/**
+ * Simple logger class to better see what's happening
+ *
+ * By default, it will prefix logs with time, the logger name, and log level (DEBUG to ERROR)
+ * Example output: "31.293 #name INFO example"
+ */
+class Logger {
+
+  /**
+   * Make a new logger
+   *
+   * @param {String} name logger's name, if not provided it will be an id (#0, #1, ...)
+   * @param {Boolean} silent whether it will be completly silent or not
+   */
+  constructor(name = null, silent = false) {
+    // output method = forward to console as it (if not silent)
+    if (silent) {
+      this.output = () => {};
+    } else {
+      this.output = console.log.bind(console);
+    }
+
+    // log method = prefix with logger name and time (but not level)
+    let coloredName;
+    if (name) {
+      coloredName = colors.white(name);
+    } else {
+      coloredName = colors.white('#' + currentId.toString(16).toUpperCase());
+      currentId += 1;
+    }
+
+    if (Logger.config.time) {
+      this.log = (...msg) => {
+        const time = ((Date.now() / 1000) - start).toFixed(3);
+        this.output(colors.bold.green(time), coloredName, ...msg);
+      };
+    } else {
+      this.log = this.output.bind(coloredName);
     }
   }
 
@@ -43,9 +65,7 @@ class Logger {
   }
 }
 
-Logger.currentId = 1;
-Logger.start = (Date.now() / 1000) - process.uptime();
-
+// global config
 Logger.config = {
   debug: false,
   time: true,

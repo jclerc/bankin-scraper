@@ -1,5 +1,11 @@
 
-// needs to be a function for class context
+/**
+ * Navigate to an url, and wait for selectors that will hold transactions
+ * Note: it needs to be a function for class context
+ *
+ * @param {String} url
+ * @returns {Frame} frame (main document or iframe) containing transactions list
+ */
 const navigate = async function (url) {
   // load page using given url
   this.logger.info('Going to ' + url);
@@ -19,7 +25,7 @@ const navigate = async function (url) {
       .then(() => this.page.frames().find(f => f.name() === 'fm')),
   ]);
 
-  this.logger.debug('Found: ' + (frame === this.page.mainFrame() ? 'table' : 'iframe') + ' after ' + (Date.now() - start) + 'ms');
+  this.logger.debug(`Found: ${frame === this.page.mainFrame() ? 'table' : 'iframe'} after ${Date.now() - start}ms`);
   return frame;
 };
 
