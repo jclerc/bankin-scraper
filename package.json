@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "app": "node app/index.js"
+  },
   "dependencies": {
     "colors": "^1.1.2",
     "puppeteer": "^0.13.0"
