@@ -32,7 +32,7 @@ class Logger {
     if (name) {
       coloredName = colors.white(name);
     } else {
-      coloredName = colors.white('#' + currentId.toString(16).toUpperCase());
+      coloredName = colors.white(`#${currentId}`);
       currentId += 1;
     }
 
