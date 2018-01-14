@@ -1,8 +1,8 @@
 
 module.exports = {
   // define url to scrap
-  // url: 'https://web.bankin.com/challenge/index.html?start={START}',
-  url: 'http://localhost:9000/?start={START}',
+  url: 'https://web.bankin.com/challenge/index.html?start={START}',
+  // url: 'http://localhost:9000/index.html?start={START}',
 
   // used to get next url (start parameter)
   transactionsPerPage: 50,
@@ -17,7 +17,7 @@ module.exports = {
 
   // scrapper option
   scrapper: {
-    // set timeout to 400 = timeout early + retry if delay
+    // set timeout to 300 = timeout early + retry if delay
     // up to 3x faster, but much more errors (set maxErrorTries to 200)
     // default is 8500 = no errors
     timeout: 8500,
@@ -26,7 +26,7 @@ module.exports = {
   },
 
   // how many chrome tabs will be used (or parallel scrappers)
-  tabs: 12,
+  tabs: 16,
 
   // how many retries allowed
   maxErrorTries: 20,
