@@ -19,7 +19,7 @@ And start by running **`node app`**!
 ## How it works?
 
 It was built on `node 9.3.0`, using `puppeteer 0.13.0` to manipulate `Headless Chrome 63`.
-More technically speaking, the script starts the browser without its interface, open some tabs to fetch multiple pages simultanously.
+More technically speaking, the script starts the browser without its interface, open some tabs to fetch multiple pages simultaneously.
 As soon as a tab fetched the data, it goes to the next url and so on, until there is no more transactions.
 Per default, it will use 16 tabs.
 
@@ -36,9 +36,9 @@ Here is some measures:
 
 _`cpu` here is measured by time command, and represent how much cpu time the process actually took_
 
-Now, deciding how much tabs we need isn't that obvious.
-For instance, using 32 to 64 tabs make it slightly faster, but it takes almost 2x more memory.
-But we can make an approximation on how many times we can run the script per hour and per gb of ram: `x = 3600/time * (1000/mem)`.
+Now, deciding how many tabs we need isn't that obvious.
+For instance, using 32 to 64 tabs make it slightly faster, but it almost takes 2x more memory.
+But we can approximate how many times we can run the script per hour and per gb of ram: `x = 3600/time * (1000/mem)`.
 Here are the results:
 
 | tabs            | 1      | 2      | 4      | 8      | 16     | 32     | 64      |
@@ -47,7 +47,7 @@ Here are the results:
 
 In a graphical way:
 ![chart](https://i.imgur.com/2FIyYHU.jpg)\
-_Left chart is on a linear scale, right chart on a logarithm one_
+_The left chart is on a linear scale, right chart on a logarithm one_
 
 So using anything between 8 to 16 tabs will allow us to make ±600 scraps per hour using 1gb of ram.
 Thus, the most efficient should be something like 12 tabs, but using 16 tabs is nearly equally efficient while being considerably faster for the end-user.
@@ -59,8 +59,8 @@ As a conclusion, **16 tabs** seems to be the best considering both efficiency an
 Here we take advantage of the fact we know there is 100 pages of transactions to fetch.
 If, for instance, the user would have just 2, then 14 tabs would be opened for nothing.
 
-Hopefully, this can be be easily avoided.\
-If we scrapped the user in the past, we can estimate how many transactions (and thus pages) he would have.\
+Hopefully, this can be easily avoided.\
+If we scraped the user in the past, we can estimate how many transactions (and thus pages) he would have.\
 If we don't know, then we can edit our code to open more tabs (up to 16) each time a new transaction page is found.
 For instance, we start with 2 tabs, if a 3rd page is found, we open 2 more tabs, and so on.
 
@@ -86,14 +86,14 @@ But we can make it faster by analyzing a bit the page we scrap. `Math.random` is
 - a delay is made if `(Math.random() * 100) % 2 === 0`
 - that delay will be `1000 * Math.floor((Math.random() * 100 % 8))` (0 to 7000)
 
-So evaluating the following code before any script is enough to avoid any dialog, display transactions in table and avoiding any delay.
+So evaluating the following code before any script is enough to avoid any dialog, display transactions in a table and avoiding any delay.
 ```js
 Math.random = () => 0.99; # or any odd value
 ```
 
 You can test it by setting `inject: true` in config _(you can revert previous changes made for timeout if you did)_. Doing so, using 16 tabs, all transactions are fetched in less than **3 seconds** :)
 
-As a side note, while this is highly specific to this challenge and won't work on any other page, I think this kind of technic can still be used for scrapping real banks.
+As a side note, while this is highly specific to this challenge and won't work on any other page, I think this kind of technic can still be used for scraping real banks.
 It may be by cancelling useless requests (CSS, images, ads...), or injecting javascript to change the page behaviour.
 
 _But the challenge was only about speed, right?_
