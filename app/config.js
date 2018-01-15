@@ -15,8 +15,8 @@ module.exports = {
     time: true,
   },
 
-  // scrapper option
-  scrapper: {
+  // scraper option
+  scraper: {
     // set timeout to 300 = timeout early + retry if delay
     // up to 3x faster, but much more errors (set maxErrorTries to 200)
     // default is 8500 = no errors
@@ -25,7 +25,7 @@ module.exports = {
     inject: false,
   },
 
-  // how many chrome tabs will be used (or parallel scrappers)
+  // how many chrome tabs will be used (or parallel scrapers)
   tabs: 16,
 
   // how many retries allowed

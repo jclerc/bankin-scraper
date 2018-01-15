@@ -1,4 +1,4 @@
-# Bankin scrapper
+# Bankin scraper
 
 ![terminal](https://i.imgur.com/gcCUUUt.gif)
 
@@ -9,8 +9,8 @@ This is a solution to the [engineering challenge](/CHALLENGE.md) of Bankin, wher
 ## How can I run it?
 
 ```shell
-git clone https://github.com/JClerc/BankinScrapper.git
-cd BankinScrapper
+git clone https://github.com/JClerc/BankinScraper.git
+cd BankinScraper
 yarn # or npm install
 ```
 

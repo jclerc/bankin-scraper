@@ -3,8 +3,8 @@
 const puppeteer = require('puppeteer');
 // file system helper
 const fs = require('fs');
-// our scrapper class
-const Scrapper = require('./scrapper');
+// our scraper class
+const Scraper = require('./scraper');
 // our logger utility
 const Logger = require('./logger');
 // and config values
@@ -43,11 +43,11 @@ puppeteer.launch().then(async (browser) => {
     // close default tab
     browser.pages().then(pages => pages.forEach(page => page.close()));
 
-    // our scrapper array (holding promises)
-    const scrappers = [];
+    // our scraper array (holding promises)
+    const scrapers = [];
     for (let i = 0; i < config.tabs; i++) {
-      const scrapper = browser.newPage().then(page => new Scrapper(page, new Logger(), config.scrapper));
-      scrappers.push(scrapper);
+      const scraper = browser.newPage().then(page => new Scraper(page, new Logger(), config.scraper));
+      scrapers.push(scraper);
     }
 
     // transactions chunks, or indexed-array of array of transactions
@@ -60,21 +60,21 @@ puppeteer.launch().then(async (browser) => {
     let currentIndex = 0;
     let maxErrorTries = config.maxErrorTries;
 
-    const work = async function work(scrapper) {
+    const work = async function work(scraper) {
       // get index of the page we will fetch
       let index;
       if (errors.length) {
         // retry errors first
         if (maxErrorTries-- <= 0) {
           // too many errors, stopping now
-          scrapper.logger.error('work → too many errors');
+          scraper.logger.error('work → too many errors');
           return;
         }
         // get last errored work
         index = errors.pop();
       } else if (!hasMore) {
         // reached the end, and no error
-        scrapper.logger.debug('No more work to do for this scrapper');
+        scraper.logger.debug('No more work to do for this scraper');
         return;
       } else {
         // fetch next page
@@ -87,7 +87,7 @@ puppeteer.launch().then(async (browser) => {
 
         // fetch transactions
         const start = Date.now();
-        const data = await scrapper.fetch(url);
+        const data = await scraper.fetch(url);
         const ms = Date.now() - start;
 
         if (!data) {
@@ -99,8 +99,8 @@ puppeteer.launch().then(async (browser) => {
         }
 
         // debug logging
-        scrapper.logger.info(`Fetched ${data.length} transactions for chunk #${index} in ${ms}ms`);
-        scrapper.logger.debug('→', `${JSON.stringify(data).substr(0, 57)}..`);
+        scraper.logger.info(`Fetched ${data.length} transactions for chunk #${index} in ${ms}ms`);
+        scraper.logger.debug('→', `${JSON.stringify(data).substr(0, 57)}..`);
 
         // success, add chunk to result set
         chunks[index] = data;
@@ -108,16 +108,16 @@ puppeteer.launch().then(async (browser) => {
         // DEBUG: stop after few requests
         // if (chunks.length >= 20) hasMore = false;
       } catch (error) {
-        scrapper.logger.error('work →', error);
+        scraper.logger.error('work →', error);
         errors.push(index);
       }
 
       // and call the next work
-      await work(scrapper);
+      await work(scraper);
     };
 
     // let's start all promises!
-    await Promise.all(scrappers.map(scrapper => scrapper.then(work)));
+    await Promise.all(scrapers.map(scraper => scraper.then(work)));
 
     // close browser properly
     logger.debug('Closing...');

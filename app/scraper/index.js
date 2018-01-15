@@ -4,12 +4,12 @@ const navigate = require('./navigate');
 const extract = require('./extract');
 
 /**
- * This scrapper class handle 1 page to navigate and extract data
+ * This scraper class handle 1 page to navigate and extract data
  */
-class Scrapper {
+class Scraper {
 
   /**
-   * Setup scrapper and prepare page
+   * Setup scraper and prepare page
    *
    * @param {Page} page
    * @param {Logger} logger
@@ -41,8 +41,8 @@ class Scrapper {
       this.logger.debug('Clicked reload button!');
     });
 
-    // scrapper is ready
-    this.logger.debug('Scrapper initialized!');
+    // scraper is ready
+    this.logger.debug('Scraper initialized!');
   }
 
   /**
@@ -60,7 +60,7 @@ class Scrapper {
 }
 
 // separate logic in their own file
-Scrapper.prototype.navigate = navigate;
-Scrapper.prototype.extract = extract;
+Scraper.prototype.navigate = navigate;
+Scraper.prototype.extract = extract;
 
-module.exports = Scrapper;
+module.exports = Scraper;
