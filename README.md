@@ -91,11 +91,11 @@ So evaluating the following code before any script is enough to avoid any dialog
 Math.random = () => 0.99; # or any odd value
 ```
 
-You can test it by setting `inject: true` in config _(you can revert previous changes made for timeout if you did)_. Doing so, using 16 tabs, all transactions are fetched in **3.6 seconds** :)
+You can test it by setting `inject: true` in config _(you can revert previous changes made for timeout if you did)_. Doing so, using 16 tabs, all transactions are fetched in less than **3 seconds** :)
 
 As a side note, while this is highly specific to this challenge and won't work on any other page, I think this kind of technic can still be used for scrapping real banks.
 It may be by cancelling useless requests (CSS, images, ads...), or injecting javascript to change the page behaviour.
 
 _But the challenge was only about speed, right?_
 
-![terminal](https://i.imgur.com/LAIsZLw.gif)
+![terminal](https://i.imgur.com/8Hj6uSW.gif)
