@@ -1,4 +1,4 @@
-# Bankin scraper
+# Bankin Scraper
 
 ![terminal](https://i.imgur.com/gcCUUUt.gif)
 
@@ -16,7 +16,7 @@ yarn # or npm install
 
 And start by running **`node app`**!
 
-## How it works?
+## How does it works?
 
 It was built on `node 9.3.0`, using `puppeteer 0.13.0` to manipulate `Headless Chrome 63`.
 More technically speaking, the script starts the browser without its interface, open some tabs to fetch multiple pages simultaneously.
