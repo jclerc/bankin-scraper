@@ -1,4 +1,5 @@
 
+// here is the default configuration
 module.exports = {
   // define url to scrap
   url: 'https://web.bankin.com/challenge/index.html?start={START}',
