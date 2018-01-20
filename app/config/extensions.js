@@ -2,6 +2,11 @@
 // extensions are used to quickly change configuration directly from command line
 module.exports = {
 
+  default: {
+    description: 'the default configuration - recommended',
+    config: {},
+  },
+
   timeout: {
     description: 'x2 faster using lower timeout to retry slow requests',
     config: {

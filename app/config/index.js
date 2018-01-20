@@ -14,12 +14,8 @@ const args = process.argv.slice(2).map(arg => arg.replace(/-/g, ''));
 // no args -> print help
 if (args.length === 0 || args.some(arg => arg === 'h' || arg === 'help')) {
   console.log(`\n${colors.blue('HELP')} Please append a configuration name to start:`);
-
-  const help = (name, desc) => `${colors.gray('-')} node app ${colors.white(name)} ${colors.gray(`# ${desc}`)}`;
-
-  console.log(help('default', 'the default configuration - recommended'));
   Object.entries(extensions).forEach(([name, ext]) => {
-    console.log(help(name, ext.description));
+    console.log(`${colors.gray('-')} node app ${colors.white(name)} ${colors.gray(`# ${ext.description}`)}`);
   });
   console.log(`\nMore information in ${colors.underline('README.md')} file!\n`);
 
@@ -27,20 +23,16 @@ if (args.length === 0 || args.some(arg => arg === 'h' || arg === 'help')) {
   process.exit(0);
 }
 
-// default = no extension, so remove from args
-const defaults = ['', 'def', 'default'];
-const params = args.filter(arg => defaults.indexOf(arg) === -1);
-
-// check if other params are binded to extensions
-const invalid = params.filter(arg => !extensions[arg]);
+// check if args are binded to invalid extensions
+const invalid = args.filter(arg => !extensions[arg]);
 if (invalid.length > 0) {
   console.log(`${colors.red('ERROR')} invalid configuration extensions: ${invalid.join(', ')}`);
-  console.log(`Valids are: ${['default', ...Object.keys(extensions)].join(', ')}`);
+  console.log(`Valids are: ${Object.keys(extensions).join(', ')}`);
   // error as it wasn't expected
   process.exit(110);
 }
 
 // make our config
-const config = params.reduce((obj, param) => deepmerge(obj, extensions[param].config), base);
+const config = args.reduce((obj, param) => deepmerge(obj, extensions[param].config), base);
 
 module.exports = config;
