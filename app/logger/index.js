@@ -24,7 +24,7 @@ class Logger {
     if (silent) {
       this.output = () => {};
     } else {
-      this.output = console.log.bind(console);
+      this.output = (...args) => process.stderr.write(`${args.join(' ')}\n`);
     }
 
     // log method = prefix with logger name and time (but not level)
