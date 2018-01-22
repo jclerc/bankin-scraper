@@ -12,7 +12,7 @@ const navigate = async function (url) {
   const rep = await this.page.goto(url, { waitUntil: 'domcontentloaded' });
 
   // ensure we are ok
-  if (!rep.ok && rep.status !== 304) throw new Error(`Invalid status: ${rep.status}`);
+  if (!rep.ok() && rep.status() !== 304) throw new Error(`Invalid status: ${rep.status()}`);
 
   // avoid infinite waiting
   const { timeout } = this.config;
