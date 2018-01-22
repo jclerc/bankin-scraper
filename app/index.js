@@ -37,7 +37,7 @@ process.on('exit', () => {
 });
 
 // starting now
-logger.info('Starting...');
+logger.info(`Starting using ${config.tabs} tabs...`);
 puppeteer.launch().then(async (browser) => {
   try {
     // close default tab
@@ -58,7 +58,7 @@ puppeteer.launch().then(async (browser) => {
     // variables to control the loop
     let hasMore = true;
     let currentIndex = 0;
-    let maxErrorTries = config.maxErrorTries;
+    let { maxErrorTries } = config;
 
     const work = async function work(scraper) {
       // get index of the page we will fetch
@@ -133,9 +133,11 @@ puppeteer.launch().then(async (browser) => {
       // log some transactions
       const json = JSON.stringify(transactions);
       logger.info(`Ended with ${transactions.length} transactions:`, `\n${json.substr(0, 300)}   . . .   ${json.slice(-300)}`);
-      if (config.outputFile) {
-        logger.info(`Writing results to file "${config.outputFile}" (${Math.floor(json.length / 1000)}kb)`);
-        fs.writeFileSync(config.outputFile, `${json}\n`);
+      if (config.output === true) {
+        console.log(json);
+      } else if (typeof config.output === 'string') {
+        logger.info(`Writing results to file "${config.output}" (${Math.floor(json.length / 1000)}kb)`);
+        fs.writeFileSync(config.output, `${json}\n`);
       }
     }
   } catch (error) {

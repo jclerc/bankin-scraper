@@ -32,7 +32,8 @@ module.exports = {
   // how many retries allowed
   maxErrorTries: 20,
 
-  // the file where results will be saved
+  // set to true to print results to stdout
+  // set to any string to store in the path
   // set to false to prevent this
-  outputFile: './output.json',
+  output: './output.json',
 };

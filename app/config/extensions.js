@@ -26,4 +26,11 @@ module.exports = {
     },
   },
 
+  stdout: {
+    description: 'print results to stdout',
+    config: {
+      output: true,
+    },
+  },
+
 };
