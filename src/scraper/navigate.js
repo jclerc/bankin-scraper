@@ -8,8 +8,11 @@
  */
 const navigate = async function (url) {
   // load page using given url
-  this.logger.info('Going to ' + url);
-  await this.page.goto(url, { waitUntil: 'domcontentloaded' });
+  this.logger.info(`Going to ${url}`);
+  const rep = await this.page.goto(url, { waitUntil: 'domcontentloaded' });
+
+  // ensure we are ok
+  if (!rep.ok && rep.status !== 304) throw new Error(`Invalid status: ${rep.status}`);
 
   // avoid infinite waiting
   const { timeout } = this.config;
