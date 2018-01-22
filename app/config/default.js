@@ -27,7 +27,8 @@ module.exports = {
   },
 
   // how many chrome tabs will be used (or parallel scrapers)
-  tabs: 16,
+  // tip: 32 for performance, 12 for efficiency, 16 for both
+  tabs: 32,
 
   // how many retries allowed
   maxErrorTries: 20,
