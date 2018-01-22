@@ -13,13 +13,13 @@ const args = process.argv.slice(2).map(arg => arg.replace(/-/g, ''));
 
 // no args -> print help
 if (args.length === 0 || args.some(arg => arg === 'h' || arg === 'help')) {
-  // print "node app <cmd> # <desc>"
+  // print "node src <cmd> # <desc>"
   const usage = (cmd, desc) => {
-    console.log(`${colors.gray('-')} node app ${colors.white(cmd)} ${colors.gray(`# ${desc}`)}`);
+    console.log(`${colors.gray('-')} node src ${colors.white(cmd)} ${colors.gray(`# ${desc}`)}`);
   };
 
   // usage
-  console.log(`\n${colors.blue('USAGE')} node app [configuration ...] [tabs]`);
+  console.log(`\n${colors.blue('USAGE')} node src [configuration ...] [tabs]`);
 
   // help
   console.log(`\n${colors.blue('HELP')} Please append at least one configuration name to start:`);
