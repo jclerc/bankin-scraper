@@ -14,7 +14,7 @@ const extract = async function (frame) {
     const transactions = [];
     // iterate over rows, skipping first (header)
     for (let i = 1; i < nodes.length; i++) {
-      const children = nodes[i].children;
+      const { children } = nodes[i];
       const transaction = [];
       // get cells text
       for (let j = 0; j < children.length; j++) {
@@ -35,7 +35,7 @@ const extract = async function (frame) {
 
     // get any number in string, e.g.: "transaction 4" → 4
     const transaction = /\b\d+\b/.exec(row[1]);
-    // get currency (before or after) and amount (positive or negative, with decimals), skipping spaces
+    // get currency (before or after) and amount (+ or -, with decimals), skipping spaces
     // e.g.: "$32.40" → [$, 32.40], "-32,40 €" → [-32.40, €]
     const amount = /^(.*?) *(-?\d+(?:[,.]\d+)?) *(.*?)$/.exec(row[2]);
 

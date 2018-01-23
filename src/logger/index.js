@@ -12,7 +12,6 @@ let currentId = 1;
  * Example output: "31.293 #name INFO example"
  */
 class Logger {
-
   /**
    * Make a new logger
    *

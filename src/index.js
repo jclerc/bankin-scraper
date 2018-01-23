@@ -46,7 +46,8 @@ puppeteer.launch().then(async (browser) => {
     // our scraper array (holding promises)
     const scrapers = [];
     for (let i = 0; i < config.tabs; i++) {
-      const scraper = browser.newPage().then(page => new Scraper(page, new Logger(), config.scraper));
+      const scraper = browser.newPage()
+        .then(page => new Scraper(page, new Logger(), config.scraper));
       scrapers.push(scraper);
     }
 
@@ -65,20 +66,22 @@ puppeteer.launch().then(async (browser) => {
       let index;
       if (errors.length) {
         // retry errors first
-        if (maxErrorTries-- <= 0) {
+        if (maxErrorTries <= 0) {
           // too many errors, stopping now
           scraper.logger.error('work → too many errors');
           return;
         }
         // get last errored work
         index = errors.pop();
+        maxErrorTries -= 1;
       } else if (!hasMore) {
         // reached the end, and no error
         scraper.logger.debug('No more work to do for this scraper');
         return;
       } else {
         // fetch next page
-        index = currentIndex++;
+        index = currentIndex;
+        currentIndex += 1;
       }
 
       try {

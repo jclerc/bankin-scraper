@@ -7,7 +7,6 @@ const extract = require('./extract');
  * This scraper class handle 1 page to navigate and extract data
  */
 class Scraper {
-
   /**
    * Setup scraper and prepare page
    *
