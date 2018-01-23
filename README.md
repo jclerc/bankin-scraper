@@ -20,7 +20,7 @@ But for advanced usage, run `node src` to print some help on how cli arguments c
 
 - `node src default` use default configuration (same as `yarn start`)
 - `node src stdout` print results to stdout
-- `node src inject 16` use script injection (explained later in this README), using 16 tabs
+- `node src inject 10` use script injection (explained later in this README) with 10 tabs
 
 #### Notes
 
@@ -98,7 +98,7 @@ Yes, but what will follow may not be applicable for real bank pages. Note that t
 If delay of the page is somewhat random, we can lower the timeout, so if the page is slow we scrap the same page again and hope that the second try (or 3rd) will be faster.
 This works great for our challenge where delay is randomized.
 
-To test that, run `node src timeout 16`.
+To test that, run `node src timeout`.
 It will use 16 tabs and throw a lot of errors but it will query all transactions in more or less 7 seconds!
 
 #### Using reverse-engineering
@@ -114,7 +114,7 @@ So evaluating the following code before any script is enough to avoid any dialog
 Math.random = () => 0.99; # or any odd value
 ```
 
-You can test it by running `node src inject 16`. Doing so, using 16 tabs, all transactions are fetched in less than **3 seconds** :)
+You can test it by running `node src inject`. Doing so, using 16 tabs, all transactions are fetched in less than **3 seconds** :)
 
 As a side note, while this is highly specific to this challenge and won't work on any other page, I think this kind of technic can still be used for scraping real banks.
 It may be by cancelling useless requests (CSS, images, ads...), or injecting javascript to change the page behaviour.

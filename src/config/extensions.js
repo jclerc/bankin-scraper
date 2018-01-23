@@ -14,6 +14,7 @@ module.exports = {
         timeout: 300,
       },
       maxErrorTries: 200,
+      tabs: 16,
     },
   },
 
@@ -23,6 +24,7 @@ module.exports = {
       scraper: {
         inject: true,
       },
+      tabs: 16,
     },
   },
 
