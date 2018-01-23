@@ -1,6 +1,6 @@
 {
   "name": "bankin-scraper",
-  "description": "Scrap transactions from a website - Bankin Challenge",
+  "description": "Scrape transactions from a website - Bankin Challenge",
   "version": "1.0.0",
   "main": "src/index.js",
   "license": "MIT",
