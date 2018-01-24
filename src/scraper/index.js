@@ -32,11 +32,8 @@ class Scraper {
       // dismiss any dialog
       this.logger.debug(`Dialog → "${dialog.message()}"`);
       dialog.dismiss();
-
       // btnGenerate is generated right after
-      await this.page.waitForSelector('#btnGenerate');
-      const btn = await this.page.$('#btnGenerate');
-      btn.click();
+      await this.page.waitForSelector('#btnGenerate').then(btn => btn.click());
       this.logger.debug('Clicked reload button!');
     });
 
