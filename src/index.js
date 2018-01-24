@@ -14,28 +14,6 @@ const config = require('./config');
 Logger.config = config.logger;
 const logger = new Logger('APP');
 
-// display stacktrace on unhandled rejection
-process.on('unhandledRejection', (error) => {
-  logger.error('Unhandled Promise Rejection:\n', error.stack);
-});
-
-// exit whole process on first Ctrl-C
-process.on('SIGINT', async () => {
-  logger.output(' → Received SIGINT');
-  logger.warn('Exiting right now.');
-  process.exit(100);
-});
-
-// on quit, display some performance stats
-process.on('exit', () => {
-  // time = how many seconds elapsed since start
-  const time = process.uptime();
-  // cpu = how much cpu time our script really took
-  const { user, system } = process.cpuUsage();
-  const cpu = ((user + system) / 1e6);
-  logger.info(`Total script took ${time.toFixed(3)}s, cpu time ${cpu.toFixed(3)}s, using ${config.tabs} tabs`);
-});
-
 // starting now
 logger.info(`Starting using ${config.tabs} tabs...`);
 puppeteer.launch().then(async (browser) => {
@@ -148,4 +126,26 @@ puppeteer.launch().then(async (browser) => {
     logger.error('fatal error →', error);
     process.exit(101);
   }
+});
+
+// on quit, display some performance stats
+process.on('exit', () => {
+  // time = how many seconds elapsed since start
+  const time = process.uptime();
+  // cpu = how much cpu time our script really took
+  const { user, system } = process.cpuUsage();
+  const cpu = ((user + system) / 1e6);
+  logger.info(`Total script took ${time.toFixed(3)}s, cpu time ${cpu.toFixed(3)}s, using ${config.tabs} tabs`);
+});
+
+// display stacktrace on unhandled rejection
+process.on('unhandledRejection', (error) => {
+  logger.error('Unhandled Promise Rejection:\n', error.stack);
+});
+
+// exit whole process on first Ctrl-C
+process.on('SIGINT', async () => {
+  logger.output(' → Received SIGINT');
+  logger.warn('Exiting right now.');
+  process.exit(100);
 });
