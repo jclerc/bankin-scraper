@@ -27,10 +27,10 @@ const extract = async function (frame) {
   });
 
   // now we are parsing 3 cells text into proper object
-  return rows.map((row) => {
+  return rows.map((row, i) => {
     // check valid input
     if (row.length !== 3) {
-      throw new Error('invalid row');
+      throw new Error(`invalid length in row #${i}: [${row.join('|')}]`);
     }
 
     // get any number in string, e.g.: "transaction 4" → 4
@@ -41,7 +41,7 @@ const extract = async function (frame) {
 
     if (!transaction || !amount) {
       // should never happen
-      throw new Error('cant parse transaction/amount');
+      throw new Error(`cant parse transaction/amount in row #${i}: [${row.join('|')}]`);
     }
 
     // return new object
