@@ -19,12 +19,12 @@ module.exports = {
   },
 
   inject: {
-    description: 'x5 faster by injecting javascript into pages',
+    description: 'get all transactions by injecting javascript into pages',
     config: {
       scraper: {
         inject: true,
       },
-      tabs: 16,
+      tabs: 1,
     },
   },
 

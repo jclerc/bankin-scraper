@@ -2,6 +2,7 @@
 // require class modules
 const navigate = require('./navigate');
 const extract = require('./extract');
+const inject = require('./inject');
 
 /**
  * This scraper class handle 1 page to navigate and extract data
@@ -19,14 +20,6 @@ class Scraper {
     this.config = config;
     this.logger = logger;
 
-    if (this.config.inject) {
-      // a bit like cheating, as this will print transactions without delay or alert
-      // (this is disabled by default)
-      this.page.evaluateOnNewDocument(() => {
-        Math.random = () => 0.99;
-      });
-    }
-
     // page events are persistent accross navigation, so they are registered once
     this.page.on('dialog', async (dialog) => {
       // dismiss any dialog
@@ -36,6 +29,12 @@ class Scraper {
       await this.page.waitForSelector('#btnGenerate').then(btn => btn.click());
       this.logger.debug('Clicked reload button!');
     });
+
+    if (this.config.inject) {
+      // a bit like cheating, as this will print all 4999 transactions directly
+      // (this is disabled by default)
+      this.page.evaluateOnNewDocument(inject);
+    }
 
     // scraper is ready
     this.logger.debug('Scraper initialized!');
