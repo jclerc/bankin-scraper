@@ -3,7 +3,12 @@
   "description": "Scrape transactions from a website - Bankin Challenge",
   "version": "1.0.0",
   "main": "src/index.js",
-  "license": "MIT",
+  "license": "GPL-3.0",
+  "author": "Jonathan Clerc",
+  "repository": "github:JClerc/BankinScraper",
+  "engines": {
+    "node": ">=8.3.0"
+  },
   "scripts": {
     "start": "node src/index.js default",
     "lint": "eslint src"
