@@ -6,18 +6,18 @@
  * @param {Frame} frame
  * @returns {Array} list of transactions
  */
-const extract = async function (frame) {
+const extract = async function extract(frame) {
   // retrieve every rows
   const rows = await frame.$$eval('table tr', (nodes) => {
     // no nodes → error
     if (nodes.length === 0) throw new Error('didnt find any row');
     const transactions = [];
     // iterate over rows, skipping first (header)
-    for (let i = 1; i < nodes.length; i++) {
+    for (let i = 1; i < nodes.length; i += 1) {
       const { children } = nodes[i];
       const transaction = [];
       // get cells text
-      for (let j = 0; j < children.length; j++) {
+      for (let j = 0; j < children.length; j += 1) {
         transaction.push(children[j].textContent.trim());
       }
       // add transaction

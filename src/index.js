@@ -23,7 +23,7 @@ puppeteer.launch().then(async (browser) => {
 
     // our scraper array (holding promises)
     const scrapers = [];
-    for (let i = 0; i < config.tabs; i++) {
+    for (let i = 0; i < config.tabs; i += 1) {
       const scraper = browser.newPage()
         .then(page => new Scraper(page, new Logger(), config.scraper));
       scrapers.push(scraper);
@@ -115,7 +115,7 @@ puppeteer.launch().then(async (browser) => {
       const json = JSON.stringify(transactions);
       logger.info(`Ended with ${transactions.length} transactions:`, `\n${json.substr(0, 300)}   . . .   ${json.slice(-300)}`);
       if (config.output === true) {
-        console.log(json);
+        process.stdout.write(`${json}\n`);
       } else if (typeof config.output === 'string') {
         logger.info(`Writing results to file "${config.output}" (${Math.floor(json.length / 1000)}kb)`);
         fs.writeFileSync(config.output, `${json}\n`);

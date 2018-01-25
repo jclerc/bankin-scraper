@@ -12,7 +12,7 @@ const inject = () => {
   const { appendChild } = Element.prototype;
   let firstHeader = true;
   // and override prototype
-  Element.prototype.appendChild = function (node) {
+  Element.prototype.appendChild = function append(node) {
     // call real method first (to have tables in right order)
     const ret = appendChild.apply(this, [node]);
     // if it's a <table>

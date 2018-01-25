@@ -6,7 +6,7 @@
  * @param {String} url
  * @returns {Frame} frame (main document or iframe) containing transactions list
  */
-const navigate = async function (url) {
+const navigate = async function navigate(url) {
   // load page using given url
   this.logger.info(`Going to ${url}`);
   const rep = await this.page.goto(url, { waitUntil: 'domcontentloaded' });

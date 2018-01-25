@@ -7,6 +7,7 @@ const colors = require('colors/safe');
 const base = require('./default');
 // extensions to extend config
 const extensions = require('./extensions');
+/* eslint "no-console": 0 */
 
 // get our args (without leading dashes, e.g. "--inject" is same as "inject")
 const args = process.argv.slice(2).map(arg => arg.replace(/-/g, ''));
