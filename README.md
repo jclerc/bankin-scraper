@@ -41,7 +41,7 @@ But for advanced usage, run `node src` (or `yarn start help`) to print some help
 
 ## How does it works?
 
-It was built on `node 9.3.0`, using `puppeteer 0.13.0` to manipulate `Headless Chrome 63`.
+It was built on `node 9.4.0`, using `puppeteer 1.0.0` to manipulate `Headless Chrome 65`.
 More technically speaking, the script starts the browser without its interface, open some tabs to fetch multiple pages simultaneously.
 As soon as a tab fetched the data, it goes to the next url and so on, until there is no more transactions.
 Per default, it will use 32 tabs.
@@ -51,6 +51,7 @@ To better understand how it works, take a look at these files:
 - `src/scraper/index.js` scraper class, handle one tab at a time _(27 lines of code)_
 - `src/scraper/navigate.js` navigate to an url and wait for transactions to be in DOM _(17 lines of code)_
 - `src/scraper/extract.js` extract the list of transactions from the DOM _(32 lines of code)_
+
 Note: the code complies to airbnb style guide, and is validated using `yarn lint`.
 
 ## How many tabs to use?
