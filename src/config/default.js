@@ -14,6 +14,8 @@ module.exports = {
     debug: false,
     // whether to prefix each line with time or not
     time: true,
+    // whether to disable all logs or not
+    silent: false,
   },
 
   // scraper option

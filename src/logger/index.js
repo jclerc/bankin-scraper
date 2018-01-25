@@ -1,3 +1,5 @@
+
+// colors utils
 const colors = require('colors/safe');
 
 // used for displaying time
@@ -16,11 +18,10 @@ class Logger {
    * Make a new logger
    *
    * @param {String} name logger's name, if not provided it will be an id (#0, #1, ...)
-   * @param {Boolean} silent whether it will be completly silent or not
    */
-  constructor(name = null, silent = false) {
+  constructor(name = null) {
     // output method = forward to console as it (if not silent)
-    if (silent) {
+    if (Logger.config.silent) {
       this.output = () => {};
     } else {
       this.output = (...args) => process.stderr.write(`${args.join(' ')}\n`);
@@ -68,6 +69,7 @@ class Logger {
 Logger.config = {
   debug: false,
   time: true,
+  silent: false,
 };
 
 module.exports = Logger;
