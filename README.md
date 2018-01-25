@@ -1,6 +1,15 @@
 # Bankin Scraper
 
-![terminal](https://i.imgur.com/IWod6SD.gif)
+<p align="center">
+  <a href="https://imgur.com/a/DYMhQ" target="_blank">
+    <img src="https://i.imgur.com/ukk3N8F.gif" alt="yarn start" />
+  </a>
+  <a href="https://imgur.com/a/DYMhQ" target="_blank">
+    <img src="https://i.imgur.com/QLxFEKb.gif" alt="yarn start inject" />
+  </a>
+  <br>
+  <em>Left: normal scraping method, <b>9.94s</b> using <code>yarn start</code></em> | <em>Right: use script injection, <b>1.98s</b> with <code>yarn start inject</code></em>
+</p>
 
 ## What is it?
 
@@ -14,20 +23,21 @@ cd BankinScraper
 yarn # or npm install
 ```
 
-To start with default configuration, simply do **`yarn start`** (or `npm run start`). It will use 32 tabs, with logs printed to console, and transactions stored in `output.json`.
+To start with default configuration, simply do **`yarn start`** (or `npm start`). It will use 32 tabs, with logs printed to console, and transactions stored in `output.json`.
 
-But for advanced usage, run `node src` to print some help on how cli arguments can change script behavior. Some examples:
+But for advanced usage, run `node src` (or `yarn start help`) to print some help on how cli arguments can change script behavior. Some examples:
 
 - `node src default` use default configuration (same as `yarn start`)
-- `node src stdout` print results to stdout
-- `node src inject 10` use script injection (explained later in this README) with 10 tabs
+- `node src stdout 64` print transactions to stdout (instead of file) with 64 tabs
+- `node src inject` use script injection (explained later in this README)
 
 #### Notes
 
-- To suppress logs, simply use `2>/dev/null`.
-- You can append arguments to `yarn start`, e.g.: `yarn start 64`
+- To suppress logs, simply use `2>/dev/null`
+- You can append arguments to `yarn start` directly, e.g.: `yarn start timeout 16`
 - Default configuration is in `src/config/default.js`
 - More cli arguments can be defined in `src/config/extensions.js`
+- Don't use `yarn start` with `stdout`, as yarn prints some lines in stdout too
 
 ## How does it works?
 
@@ -37,15 +47,16 @@ As soon as a tab fetched the data, it goes to the next url and so on, until ther
 Per default, it will use 32 tabs.
 
 To better understand how it works, take a look at these files:
-- `src/index.js` main logic, browser management and recursive system
-- `src/scraper/index.js` scraper class, handle one tab at a time
-- `src/scraper/navigate.js` navigate to an url and wait for transactions to be in DOM
-- `src/scraper/extract.js` extract the list of transactions from the DOM
+- `src/index.js` main logic, browser management and recursive system _(94 lines of code)_
+- `src/scraper/index.js` scraper class, handle one tab at a time _(27 lines of code)_
+- `src/scraper/navigate.js` navigate to an url and wait for transactions to be in DOM _(17 lines of code)_
+- `src/scraper/extract.js` extract the list of transactions from the DOM _(32 lines of code)_
+Note: the code complies to airbnb style guide, and is validated using `yarn lint`.
 
 ## How many tabs to use?
 
 Pretty obviously, the more tabs are used, the faster data is fetched, but more memory is needed.
-Here is some measures:
+Here is some measures (with a bad but constant network):
 
 | tabs            | 1      | 2      | 4      | 8      | 16     | 32     | 64      |
 |-----------------|--------|--------|--------|--------|--------|--------|---------|
@@ -53,7 +64,7 @@ Here is some measures:
 | cpu _(in sec)_  | 3.96   | 4.12   | 4.13   | 4.42   | 4.72   | 5.15   | 6.63    |
 | mem _(in mb)_   | 85.14  | 104.60 | 144.28 | 216.78 | 357.49 | 630.05 | 1175.56 |
 
-_`cpu` here is measured by time command, and represent how much cpu time the process actually took_
+_`cpu` here is measured by `time` command, and represent how much cpu time the process actually took_
 
 Here we have some data to decide how many tabs we need.
 For instance, using 32 to 64 tabs make it a little bit faster, but it almost takes 2x more memory.
@@ -85,7 +96,7 @@ If, for instance, the user would have just 2, then many tabs would be opened for
 Hopefully, this can be easily avoided.\
 If we scraped the user in the past, we can estimate how many transactions (and thus pages) he would have.\
 If we don't know, then we can edit our code to open more tabs (up to 16) each time a new transaction page is found.
-For instance, we start with 2 tabs, if a 3rd page is found, we open 2 more tabs, and so on.
+For instance, we start with 2 tabs, if a 3rd page is found, we open 4 more tabs, and so on.
 
 ------
 
@@ -98,7 +109,7 @@ Yes, but what will follow may not be applicable for real bank pages. Note that t
 If delay of the page is somewhat random, we can lower the timeout, so if the page is slow we scrap the same page again and hope that the second try (or 3rd) will be faster.
 This works great for our challenge where delay is randomized.
 
-To test that, run `node src timeout`.
+To test that, run `yarn start timeout`.
 It will use 16 tabs and throw a lot of errors but it will query all transactions in more or less 7 seconds!
 
 #### Using reverse-engineering
@@ -114,11 +125,25 @@ So evaluating the following code before any script is enough to avoid any dialog
 Math.random = () => 0.99; # or any odd value
 ```
 
-You can test it by running `node src inject`. Doing so, using 16 tabs, all transactions are fetched in less than **3 seconds** :)
+Moreover, the `doGenerate` function and `start` variable are globals, so we can increase `start` and call `goGenerate()` many times to generate all the transactions.
+We just have to handle two things:
+1. `Element.prototype.appendChild` to prevent `<th>` headers, except the first one
+2. `document.getElementById` so we make a `Proxy` around `#dvTable` to prevent `innerHTML` to be cleared on `doGenerate()`
+
+You can test it by running `yarn start inject`. Doing so, all transactions are fetched in **2 seconds** :)
 
 As a side note, while this is highly specific to this challenge and won't work on any other page, I think this kind of technic can still be used for scraping real banks.
 It may be by cancelling useless requests (CSS, images, ads...), or injecting javascript to change the page behaviour.
 
-_But the challenge was only about speed, right?_
+> But the challenge was only about speed, right?
 
-![terminal](https://i.imgur.com/8Hj6uSW.gif)
+------
+
+## Page issues
+
+We had to scrape [`https://web.bankin.com/challenge/index.html`](https://web.bankin.com/challenge/index.html), where transactions are generated on the client side.
+It uses some crypto-stuff to generate "randomly" (but using the same seed) transaction amounts, this led to few issues:
+
+1. Amounts are different depending on browser used. On Google Chrome, `Transaction 38` is `82€`, while on Safari the same transaction is `90€`.
+2. Transaction amounts change depending on `start` parameter. `start=0` → `Transaction 5` is 101€, for `start=1` → `Transaction 5` is 100€, for `start=2` → `Transaction 5` is 99€ and so on.
+3. `start` parameter can be any negative value, e.g. `-1000000000`, `-1e200` or even `-Infinity`, or float like `3.14`.
