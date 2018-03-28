@@ -2,8 +2,9 @@
 // here is the default configuration
 module.exports = {
   // define url to scrap
-  url: 'https://web.bankin.com/challenge/index.html?start={START}',
-  // url: 'http://localhost:9000/index.html?start={START}',
+  url: 'https://jclerc.github.io/bankin-scraper/?start={START}',
+  // original url: 'https://web.bankin.com/challenge/index.html?start={START}',
+  // local url: 'http://localhost:9000/index.html?start={START}',
 
   // used to get next url (start parameter)
   transactionsPerPage: 50,
