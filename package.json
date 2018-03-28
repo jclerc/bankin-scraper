@@ -1,11 +1,11 @@
 {
   "name": "bankin-scraper",
-  "description": "Scrape transactions from a website - Bankin Challenge",
+  "description": "Scrape transactions from a website - Bankin Challenge #1",
   "version": "1.0.0",
   "main": "src/index.js",
   "license": "GPL-3.0",
   "author": "Jonathan Clerc",
-  "repository": "github:JClerc/BankinScraper",
+  "repository": "github:jclerc/bankin-scraper",
   "engines": {
     "node": ">=8.3.0"
   },
